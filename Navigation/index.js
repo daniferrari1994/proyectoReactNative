@@ -1,32 +1,38 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import Categories from "../Screens/Categories";
-import Detail from "../Screens/Detail";
-import Products from "../Screens/Products";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { auth } from "../Firebase/config";
+import Auth from "../Screens/Auth";
+import TabNavigator from "./Tabs";
 
 const MainNavigator = () => {
 
+    const [user, setUser] = useState(null);
+    
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user)
+                
+                const uid = user.uid;
+
+            } else {
+                setUser(null)
+            }
+        });
+    }, [])
+
     const Stack = createNativeStackNavigator();
+
 
     return (
         <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Categories"
-            >
-                <Stack.Screen
-                    name="Categories"
-                    component={Categories}
-                    options={{ title: "Categories" }}
-                />
-                <Stack.Screen
-                    name="Products"
-                    component={Products}
-                    options={({ route }) => ({ title: route.params.category })} />
-                <Stack.Screen
-                    name="Detail"
-                    component={Detail}
-                    options={({ route }) => ({ title: route.params.title })} />
-            </Stack.Navigator>
+            {user ?
+                <TabNavigator></TabNavigator>
+                :
+                <Auth />
+            }
         </NavigationContainer>
     )
 }
